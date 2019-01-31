@@ -19,34 +19,41 @@ public class StreamInstance {
         // stream的创建方式
         // createStream();
 
+
         // stream 只能执行一次
         List<Person> persons = generateData();
+
 
         // filter(Predicate<? super T> predicate) 过滤方法
         List<Person> filterList = persons.stream().filter(person -> person.getAge() == 20).collect(Collectors.toList());
         System.out.println("过滤后: " + filterList);
 
+
         // distinct() 根据equal方法去重 处理自定义去重，需要重新定义equals和hashcode方法
         List<Integer> distinctList = Arrays.asList(1, 1, 1, 2, 2, 3, 3, 4, 4, 4).stream().distinct().collect(Collectors.toList());
         System.out.println(distinctList + "去重后: " + distinctList);
 
+
         // sort(Comparator<? super T> comparator)
         System.out.println("排序前: " + persons);
         List<Person> sortedList = persons.stream().sorted((p1, p2) -> p2.getAge() - p1.getAge()).collect(Collectors.toList());
-        ;
         System.out.println("反向排序后: " + sortedList);
+
 
         // limit(long p) 获取前p个元素
         List<Person> limitList = persons.stream().limit(2).collect(Collectors.toList());
         System.out.println("限制元素后: " + limitList);
 
+
         // skip(long p) 跳过前p个元素
         List<Person> skipList = persons.stream().skip(2).collect(Collectors.toList());
         System.out.println("去除元素后: " + skipList);
 
+
         // map(Function<? super T, ? extends R> mapper) 映射元素
         List<String> mapList = persons.stream().map(Person::getName).collect(Collectors.toList());
         System.out.println("映射后的集合: " + mapList);
+
 
         // flatMap(Function<? super T, ? extends Stream<? extends R>> mapper) 将流中的每一个元素 T 映射为一个流，再把每一个流连接成为一个流
         List<String> list = new ArrayList<>();
@@ -56,25 +63,31 @@ public class StreamInstance {
         List<String> flatMapList = list.stream().map(s -> s.split(" ")).flatMap(Arrays::stream).collect(Collectors.toList());
         System.out.println(list + "\t转变流后: " + flatMapList);
 
+
         // anyMatch(Predicate<? super T> predicate) 匹配是否有符合条件的元素
         boolean match = persons.stream().anyMatch(person -> person.getAge() == 20);
         System.out.println("是否含有年龄为20的person: " + match);
+
 
         // allMatch(Predicate<? super T> predicate) 是否所有元素都匹配条件
         boolean allMatch = persons.stream().allMatch(person -> person.getAge() == 20);
         System.out.println("是否所有年龄都为20: " + allMatch);
 
+
         // noneMatch(Predicate<? super T> predicate) 是否所有元素都不匹配条件 与allMatch相反
         boolean noneMatch = persons.stream().noneMatch(person -> person.getAge() == 20);
         System.out.println("是否所有年龄都不为20: " + noneMatch);
+
 
         // findAny() 返回值是Optional<T>  找到其中一个元素(使用 stream() 时找到的是第一个元素；使用 parallelStream() 并行时找到的是其中一个元素)
         Optional<Person> personOptional = persons.stream().findAny();
         System.out.println("寻找元素: " + personOptional);
 
+
         // findFirst() 找到第一个元素 返回值是Optional<T>
         Optional<Person> personFirst = persons.stream().findFirst();
         System.out.println("寻找第一个元素: " + personFirst);
+
 
         // reduce(BinaryOperator<T> accumulator) 和 reduce(T identity, BinaryOperator<T> accumulator)
         // reduce(U identity, BiFunction<U, ? super T, U> accumulator, BinaryOperator<U> combiner);
@@ -83,10 +96,36 @@ public class StreamInstance {
         Optional<Integer> reduce = persons.stream().map(Person::getAge).reduce(Integer::sum);
         System.out.println("求和: " + reduce.get());
 
+
         // count() 返回元素个数
         long count = persons.stream().count();
 
 
+        // collect()
+        // coollect 方法作为终端操作，接受的是一个 Collector 接口参数，能对数据进行一些收集归总操作
+        // toList() toSet() toCollection() toMap();
+        List<Integer> toList = persons.stream().map(Person::getAge).collect(Collectors.toList());
+        // coollect 汇总操作
+        // persons.stream().count() 求size
+        Long size = persons.stream().collect(Collectors.counting());
+        // 求和 summingInt、summingLong、summingDouble
+        int sum = persons.stream().collect(Collectors.summingInt(Person::getAge));
+        sum = persons.stream().mapToInt(Person::getAge).sum(); //简化
+        // 求平均数 averagingInt、averagingLong、averagingDouble
+        Double average = persons.stream().collect(Collectors.averagingInt(Person::getAge));
+        OptionalDouble aver = persons.stream().mapToInt(Person::getAge).average(); // 注意返回值
+        // 特殊方法 summarizingInt、summarizingLong、summarizingDouble
+        // 会返回 IntSummaryStatistics等类型 statistics.getXXX之类的方法 如 getMax()最大值
+        IntSummaryStatistics statistics = persons.stream().collect(Collectors.summarizingInt(Person::getAge));
+
+        // joining 连接字符串
+        String names = persons.stream().map(Person::getName).collect(Collectors.joining());
+        System.out.println("joining()连接后: " + names);
+        names = persons.stream().map(Person::getName).collect(Collectors.joining(","));
+        System.out.println("使用分隔符,连接后: " + names);
+        // joining 还有一个比较特别的重载方法 and再中间 Today在前面 play games在结尾
+        names = persons.stream().map(Person::getName).collect(Collectors.joining(" and ", "Today ", " play games."));
+        System.out.println("joining特殊连接后: " + names);  // Today mike and jack and tom play games.
     }
 
     /**

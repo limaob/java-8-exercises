@@ -1,4 +1,4 @@
-package open.maob.optional.examplr;
+package open.maob.optional.example;
 
 import java.util.Optional;
 
